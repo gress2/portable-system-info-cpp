@@ -42,21 +42,25 @@ sysinfo get_sysinfo() {
     sys.ram = std::to_string(statex.ullTotalPhys / (1024 * 1024 * 1024)) + " GB";
   #elif defined(__linux__)
     sys.os = "Linux";
-    out = popen("cat /proc/cpuinfo | grep 'model name' | uniq | sed 's/model name[[:blank:]]*:[[:blank:]]*//' | awk 1 ORS=' '", "r");
+    out = popen("cat /proc/cpuinfo | grep 'model name' | uniq |"
+       " sed 's/model name[[:blank:]]*:[[:blank:]]*//' | awk 1 ORS=' '", "r");
     sys.cpu = fgets(buffer, sizeof(buffer), out);
-    out = popen("cat /proc/meminfo | grep 'MemTotal' | sed 's/MemTotal:[[:blank:]]*//' | awk '{$1=$1/1024^2; print $1,\"GB\";}' | awk 1 ORS=' '", "r");
+    out = popen("cat /proc/meminfo | grep 'MemTotal' | sed 's/MemTotal:[[:blank:]]*//'"
+       " | awk '{$1=$1/1024^2; print $1,\"GB\";}' | awk 1 ORS=' '", "r");
     sys.ram = fgets(buffer, sizeof(buffer), out);
   #elif defined(__APPLE__)
     sys.os = "Apple";
     out = popen("sysctl -n machdep.cpu.brand_string | awk 1 ORS=' '", "r");
     sys.cpu = fgets(buffer, sizeof(buffer), out);
-    out = popen("system_profiler SPHardwareDataType | grep Memory | sed 's/[[:blank:]]*Memory: //' | awk 1 ORS=' '", "r");
+    out = popen("system_profiler SPHardwareDataType | grep Memory " 
+      "| sed 's/[[:blank:]]*Memory: //' | awk 1 ORS=' '", "r");
     sys.ram = fgets(buffer, sizeof(buffer), out);
   #elif defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
     sys.os = "BSD";
     out = popen("dmesg | grep 'CPU:' | sed 's/CPU: //' | awk 1 ORS=' '", "r");
     sys.cpu = fgets(buffer, sizeof(buffer), out);
-    out = popen("dmesg | grep 'real memory' | sed 's/.*(\\([0-9]*\\).*)/\\1/' | awk '{$1=$1/1024; print $1,\"GB\";}' | awk 1 ORS=' '", "r");
+    out = popen("dmesg | grep 'real memory' | sed 's/.*(\\([0-9]*\\).*)/\\1/'"
+       " | awk '{$1=$1/1024; print $1,\"GB\";}' | awk 1 ORS=' '", "r");
     sys.ram = fgets(buffer, sizeof(buffer), out);
   #endif
     return sys;
